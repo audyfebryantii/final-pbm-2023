@@ -1,6 +1,9 @@
 package com.d121211005.rickandmortywiki.ui.screen.main
 
 import android.annotation.SuppressLint
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -9,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -108,6 +112,7 @@ fun RickAndMortyContent(
             RickAndMortyWikiScreen.Home.name
         ){
             when(uiState.homeScreenState){
+                is CharacterScreenState.Start -> Text("Memulai")
                 is CharacterScreenState.Success ->
                     LazyColumn{
                         items(uiState.homeScreenState.characters.results.size){
@@ -115,21 +120,50 @@ fun RickAndMortyContent(
                             characterImage = uiState.homeScreenState.characters.results[index].image,
                             characterName = uiState.homeScreenState.characters.results[index].name,
                             characterStatus = uiState.homeScreenState.characters.results[index].status,
+                            viewModel = viewModel,
                             onCardClick = {
                                 navController.navigate(RickAndMortyWikiScreen.Character.name)
+                                viewModel.getCharacterInfo(uiState.homeScreenState.characters.results[index])
                             })
                         }
                     }
-                is CharacterScreenState.Start -> Text("Memulai")
+                is CharacterScreenState.Loading ->
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                    ) {
+                        CircularProgressIndicator(
+                            modifier = Modifier
+                                .size(50.dp)
+                                .align(Alignment.Center)
+                        )
+                    }
+
                 is CharacterScreenState.Empty ->
-                    Text (
-                        text = "Informasi tidak ditemukan"
-                    )
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                    ) {
+                        Text (
+                            modifier = Modifier
+                                .size(300.dp)
+                                .align(Alignment.Center),
+                            text = "Informasi tidak ditemukan"
+                        )
+                    }
+
                 is CharacterScreenState.Failure ->
-                    Text(
-                    text = "Gagal memuat informasi"
-                )
-                is CharacterScreenState.Loading -> CircularProgressIndicator()
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                    ) {
+                        Text (
+                            modifier = Modifier
+                                .size(300.dp)
+                                .align(Alignment.Center),
+                            text = "Gagal menemukan data"
+                        )
+                    }
                 else -> {}
             }
 
@@ -149,12 +183,17 @@ fun CharacterItem(
     characterName: String?,
     characterStatus: String?,
     onCardClick: () -> Unit,
+    viewModel: MainViewModel,
     modifier: Modifier = Modifier
 ) {
     Card(
         modifier = modifier
             .fillMaxWidth()
-            .padding(dimensionResource(R.dimen.padding_small)),
+            .padding(dimensionResource(R.dimen.padding_small))
+            .border(
+                BorderStroke(1.dp, color = MaterialTheme.colorScheme.primary),
+                RoundedCornerShape(8.dp)
+            ),
         onClick = onCardClick
     ) {
         Row(
@@ -192,6 +231,7 @@ fun CharacterInformation(
         if (characterName != null) {
             Text(
                 text = characterName,
+                color = MaterialTheme.colorScheme.onSecondaryContainer,
                 style = MaterialTheme.typography.displayMedium,
                 modifier = Modifier
             )

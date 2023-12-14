@@ -11,6 +11,7 @@ import com.d121211005.rickandmortywiki.RickAndMortyWikiApplication
 import com.d121211005.rickandmortywiki.CharacterScreenState
 import com.d121211005.rickandmortywiki.DetailScreenState
 import com.d121211005.rickandmortywiki.data.repository.RickAndMortyWikiRepository
+import com.d121211005.rickandmortywiki.data.model.Result
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -45,6 +46,21 @@ class MainViewModel(private val rickAndMortyWikiRepository: RickAndMortyWikiRepo
                 }
             } catch (e: IOException){
                 _uistate.update { currentState -> currentState.copy(homeScreenState = CharacterScreenState.Failure)}
+            }
+        }
+    }
+
+    fun getCharacterInfo(character : Result){
+        _uistate.update { currentState -> currentState.copy(detailScreenState = DetailScreenState.Loading) }
+        viewModelScope.launch {
+            try{
+                if(character == null){
+                    _uistate.update { currentState -> currentState.copy(detailScreenState = DetailScreenState.Empty) }
+                }else{
+                    _uistate.update { currentState ->  currentState.copy(detailScreenState = DetailScreenState.Success(character))}
+                }
+            } catch (e: IOException){
+                _uistate.update { currentState -> currentState.copy(detailScreenState = DetailScreenState.Failure)}
             }
         }
     }

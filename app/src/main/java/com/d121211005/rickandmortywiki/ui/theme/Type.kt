@@ -22,7 +22,7 @@ val Typography = Typography(
     displayMedium = TextStyle(
         fontFamily = Montserrat,
         fontWeight = FontWeight.Bold,
-        fontSize = 12.sp
+        fontSize = 14.sp
     ),
     labelSmall = TextStyle(
         fontFamily = Montserrat,
